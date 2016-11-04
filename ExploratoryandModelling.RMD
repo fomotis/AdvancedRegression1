@@ -1,0 +1,57 @@
+---
+title: Modelling The Relationship Between Survoval Time, White Blood Cell Counts and
+  Morphological Characteristics of Lukemia Patients
+author: Ayder Tanriver Ezgi, Oana Petrof, Olusoji Oluwafemi Daniel, Owokotomo Olajumoke
+  Evangelina
+date: "November 4, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F,message = F, warning = F)
+library(tidyverse)
+library(readr)
+library(magrittr)
+library(ggplot2)
+library(gamlss)
+```
+
+## Exploratory Analysis
+
+```{r}
+Lukemia <- read.table('./Data/leukemia(1).dat',header = T)
+#AG is binary
+#wbc is continuous
+#Lukemia %>% dplyr::filter(AG==0) %>% ggplot(aes(Survtime,WBC)) + geom_point()
+#Lukemia %>% dplyr::filter(AG==1) %>% ggplot(aes(Survtime,WBC)) + geom_point()
+Lukemia <- Lukemia %>% mutate(AG=factor(AG))
+#Scatter Plots between both groups
+Lukemia %>% ggplot(aes(x=WBC,y=Survtime,colour=AG)) + geom_point()
+#right skewness observed
+#histograms to drive things home
+Lukemia %>% ggplot(aes(Survtime)) + geom_histogram(bins=10) + facet_grid(.~AG)
+# Lukemia %>% with(plot(WBC,Survtime,type="n",main='Relationship Between WBC and
+#                                          SurvTime'))
+# Lukemia %>% dplyr::filter(AG==1) %>% with(points(WBC,Survtime,pch=19,col=2))
+# Lukemia %>% dplyr::filter(AG==0) %>% with(points(WBC,Survtime,pch=19,col=3))
+##Candidate Distributions include positively skewed distributions
+```
+
+## Modelling Candidate Distributions
+
+```{r}
+#Exponential
+mod1 <- Lukemia %>% gamlss(Survtime~WBC+AG+WBC*AG,family=EXP,data=.)
+#Gamma
+mod2 <- Lukemia %>% gamlss(Survtime~WBC+AG+WBC*AG,family=GA,data=.)
+#Lognormal
+mod3 <- Lukemia %>% gamlss(Survtime~WBC+AG+WBC*AG,family=LOGNO,data=.)
+#Weibull
+mod4 <- Lukemia %>% gamlss(Survtime~WBC+AG+WBC*AG,family=WEI,data=.)
+```
+
+
+
+
+
+
